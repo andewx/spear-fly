@@ -1,0 +1,69 @@
+<div class="row">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-light">Scenarios</h2>
+      <button class="btn btn-primary" bluejs="btn-create-scenario" bluejs-trigger="click" bluejs-binding="createScenario">
+        <i class="bi bi-plus-lg"></i> Create Scenario
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <% if (scenarios && scenarios.length > 0) { %>
+    <% scenarios.forEach(scenario => { %>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-header bg-secondary">
+            <h5 class="mb-0"><%= scenario.name %></h5>
+          </div>
+          <div class="card-body">
+            <% if (scenario.description) { %>
+              <p class="text-muted small"><%= scenario.description %></p>
+            <% } %>
+            
+            <div class="mb-2">
+              <strong class="text-primary">Grid:</strong>
+              <span class="text-light"><%= scenario.grid.width %>×<%= scenario.grid.height %> km</span>
+            </div>
+            
+            <div class="mb-2">
+              <strong class="text-primary">SAM:</strong>
+              <span class="text-light"><%= scenario.platforms.sam.configId %></span>
+            </div>
+            
+            <div class="mb-2">
+              <strong class="text-primary">Fighter:</strong>
+              <span class="text-light"><%= scenario.platforms.fighter.configId %></span>
+            </div>
+            
+            <% if (scenario.environment.precipitation.enabled) { %>
+              <div class="mb-2">
+                <strong class="text-primary">Precipitation:</strong>
+                <span class="text-light"><%= scenario.environment.precipitation.nominalRainRate %> mm/hr</span>
+              </div>
+            <% } else { %>
+              <div class="mb-2">
+                <strong class="text-primary">Weather:</strong>
+                <span class="text-light">Clear</span>
+              </div>
+            <% } %>
+          </div>
+          <div class="card-footer bg-dark border-secondary">
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-primary flex-fill" bluejs="btn-view-scenario-<%= scenario.id %>" bluejs-trigger="click" bluejs-binding="viewScenario" data-id="<%= scenario.id %>">View</button>
+              <button class="btn btn-sm btn-secondary" bluejs="btn-edit-scenario-<%= scenario.id %>" bluejs-trigger="click" bluejs-binding="editScenario" data-id="<%= scenario.id %>">Edit</button>
+              <button class="btn btn-sm btn-outline-danger" bluejs="btn-delete-scenario-<%= scenario.id %>" bluejs-trigger="click" bluejs-binding="deleteScenario" data-id="<%= scenario.id %>">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <div class="col-12">
+      <div class="alert alert-info">
+        No scenarios configured. Create one to get started!
+      </div>
+    </div>
+  <% } %>
+</div>

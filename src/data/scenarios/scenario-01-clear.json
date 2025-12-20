@@ -1,0 +1,44 @@
+{
+  "id": "scenario-01-clear",
+  "name": "F-16 vs S-400 (Clear Weather)",
+  "description": "Standard engagement scenario without precipitation",
+  "timeStep": "1",
+  "grid": {
+    "width": "711",
+    "height": "400",
+    "resolution": "10"
+  },
+  "platforms": {
+    "sam": {
+      "configId": "sam-s400",
+      "position": {
+        "x": "0",
+        "y": "0"
+      },
+      "heading": "0"
+    },
+    "fighter": {
+      "configId": "fighter-f16",
+      "position": {
+        "x": "-80",
+        "y": "0"
+      },
+      "heading": "0",
+      "flightPath": {
+        "type": "straight"
+      }
+    }
+  },
+  "environment": {
+    "precipitation": {
+      "nominalRainRate": "25",
+      "nominalCellSize": "15",
+      "alpha": "0.1",
+      "nominalCoverage": "0.5",
+      "maxRainRateCap": "1",
+      "sigmoidK": "10",
+      "enabled": false
+    }
+  },
+  "updatedAt": "2025-12-19T19:53:41.238Z"
+}

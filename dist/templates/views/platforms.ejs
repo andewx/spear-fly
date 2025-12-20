@@ -1,0 +1,83 @@
+<div class="row">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-light">Platform Configurations</h2>
+      <div class="btn-group">
+        <button class="btn btn-primary" bluejs="btn-create-platform" bluejs-trigger="click" bluejs-binding="createPlatform">
+          <i class="bi bi-plus-lg"></i> Create Platform
+        </button>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary">
+          <li><a class="dropdown-item text-light" href="#" bluejs="link-create-sam" bluejs-trigger="click" bluejs-binding="createSAMSystem">Create SAM System</a></li>
+          <li><a class="dropdown-item text-light" href="#" bluejs="link-create-fighter" bluejs-trigger="click" bluejs-binding="createFighter">Create Fighter Aircraft</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card bg-dark border-secondary mb-4">
+      <div class="card-header bg-secondary">
+        <h5 class="mb-0">SAM Systems</h5>
+      </div>
+      <div class="card-body">
+        <% if (samSystems && samSystems.length > 0) { %>
+          <div class="list-group">
+            <% samSystems.forEach(sam => { %>
+              <div class="list-group-item list-group-item-action bg-dark border-secondary text-light">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-1"><%= sam.name %></h6>
+                    <small class="text-muted">MEMR: <%= sam.memr %> km | <%= sam.systemFrequency %> GHz</small>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <small class="text-primary me-2"><%= sam.nominalRange %> km</small>
+                    <button class="btn btn-sm btn-outline-secondary py-0" bluejs="btn-edit-sam-<%= sam.id %>" bluejs-trigger="click" bluejs-binding="editPlatform" data-type="sam" data-id="<%= sam.id %>">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger py-0" bluejs="btn-delete-sam-<%= sam.id %>" bluejs-trigger="click" bluejs-binding="deletePlatform" data-type="sam" data-id="<%= sam.id %>">Del</button>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-muted">No SAM systems configured</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card bg-dark border-secondary mb-4">
+      <div class="card-header bg-secondary">
+        <h5 class="mb-0">Fighter Aircraft</h5>
+      </div>
+      <div class="card-body">
+        <% if (fighters && fighters.length > 0) { %>
+          <div class="list-group">
+            <% fighters.forEach(fighter => { %>
+              <div class="list-group-item list-group-item-action bg-dark border-secondary text-light">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-1"><%= fighter.type %></h6>
+                    <small class="text-muted">RCS: <%= fighter.rcs.nose %> m² (nose)</small>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <small class="text-primary me-2">Mach <%= fighter.velocity %></small>
+                    <button class="btn btn-sm btn-outline-secondary py-0" bluejs="btn-edit-fighter-<%= fighter.id %>" bluejs-trigger="click" bluejs-binding="editPlatform" data-type="fighter" data-id="<%= fighter.id %>">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger py-0" bluejs="btn-delete-fighter-<%= fighter.id %>" bluejs-trigger="click" bluejs-binding="deletePlatform" data-type="fighter" data-id="<%= fighter.id %>">Del</button>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-muted">No fighter platforms configured</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

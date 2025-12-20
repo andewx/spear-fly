@@ -1,0 +1,12 @@
+{
+  "id": "sam-s400",
+  "name": "S-400 Triumf",
+  "nominalRange": "250",
+  "pulseModel": "medium",
+  "systemFrequency": "6.0",
+  "manualAcquisitionTime": "20",
+  "autoAcquisitionTime": "5",
+  "memr": "150",
+  "missileVelocity": "12.0",
+  "missileTrackingFrequency": "10.0"
+}

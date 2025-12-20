@@ -1,0 +1,247 @@
+/**
+ * Core type definitions for SPEAR application
+ * Naming convention: Interfaces use I prefix, type aliases use T prefix
+ */
+
+// ============================================================================
+// Platform Types
+// ============================================================================
+
+export type TPulseModel = 'short' | 'medium' | 'long';
+export type TFighterType = 'F-16' | 'F-22' | 'F-35';
+
+export interface ISAMSystem {
+  id: string;
+  name: string;
+  nominalRange: number; // km, for 1m² RCS target
+  pulseModel: TPulseModel;
+  manualAcquisitionTime: number; // seconds
+  autoAcquisitionTime: number; // seconds
+  memr: number; // Maximum Effective Missile Range )
+  missileVelocity: number; // Mach number
+  systemFrequency: number; // GHz
+  missileTrackingFrequency: number; // GHz
+}
+
+export interface IFighterPlatform {
+  id: string;
+  type: TFighterType;
+  velocity: number; // Mach number
+  rcs: IRCSProfile; // Multi-aspect RCS (Swerling 2 model)
+  harmParams: IHARMParameters;
+}
+
+export interface IRCSProfile {
+  nose: number; // m²
+  tail: number; // m²
+  side: number; // m²
+  top: number; // m²
+  bottom: number; // m²
+}
+
+export interface IHARMParameters {
+  velocity: number; // Mach number
+  range: number; // km
+  launchPreference: 'maxRange' | 'memrRatio'; // Launch at max range or ratio of MEMR
+  memrRatio?: number; // If launchPreference is memrRatio (0-1)
+}
+
+// ============================================================================
+// Simulation State Types (runtime dynamic state)
+// ============================================================================
+
+export interface ISimulationState {
+  time: number; // Current simulation time (seconds)
+  sam: IPlatformState;
+  fighter: IPlatformState;
+  missiles: IMissileState[];
+}
+
+export interface IPlatformState {
+  position: IPosition2D; // Current position (km)
+  velocity: IVelocity2D; // Current velocity (km/s)
+  heading: number; // Current heading (degrees)
+  status: 'active' | 'destroyed' | 'escaped';
+}
+
+export interface IVelocity2D {
+  x: number; // km/s
+  y: number; // km/s
+}
+
+export interface IMissileState {
+  id: string;
+  type: 'SAM' | 'HARM';
+  launchedBy: 'sam' | 'fighter';
+  launchTime: number; // seconds
+  position: IPosition2D; // Current position (km)
+  velocity: IVelocity2D; // Current velocity (km/s)
+  targetPosition: IPosition2D; // Target position at launch (km)
+  status: 'inflight' | 'hit' | 'miss' | 'intercepted';
+}
+
+// ============================================================================
+// Scenario Types
+// ============================================================================
+
+export interface IScenario {
+  id: string;
+  name: string;
+  description?: string;
+  grid: IGridBounds;
+  timeStep: number; // seconds
+  platforms: IScenarioPlatforms;
+  environment: IScenarioEnvironment;
+  precipitationFieldImage?: string; // Filename of generated precipitation field JPEG
+  precipitationFieldOverlay?: string; // Filename of generated precipitation field overlay PNG
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface IGridBounds {
+  width: number; // km
+  height: number; // km
+  resolution: number; // pixels per km
+  origin?: IPosition2D;
+}
+
+export interface IPosition2D {
+  x: number; // km
+  y: number; // km
+}
+
+export interface IScenarioPlatforms {
+  sam: IScenarioPlatform;
+  fighter: IScenarioFighter;
+}
+
+export interface IScenarioPlatform {
+  configId: string; // References ISAMSystem.id or IFighterPlatform.id
+  position: IPosition2D;
+  heading: number; // degrees
+}
+
+export interface IScenarioFighter extends IScenarioPlatform {
+  flightPath: IFlightPath;
+}
+
+export interface IFlightPath {
+  type: TFlightPathType;
+  params?: Record<string, unknown>; // Optional path-specific parameters
+}
+
+export type TFlightPathType = 'straight' | 'evasive' | 'memrFringe';
+
+
+export interface IScenarioEnvironment {
+  precipitation: IPrecipitationConfig;
+}
+
+export interface IPrecipitationConfig {
+  enabled: boolean;
+  nominalRainRate: number; // mm/hr
+  nominalCellSize: number; // km
+  nominalCoverage: number; // percentage (0-100%)
+  alpha: number; // sigma = alpha * nominalCellSize: var = sigma^2
+  maxRainRateCap: number; // multiplier for max rain rate (e.g., 1.5 = 150% of nominal)
+  sigmoidK: number; // Sigmoid steepness for dynamic range compression (higher = more compression)
+  seed?: number; // Random seed for reproducible generation
+}
+
+export interface IPrecipitationField {
+  cells: IPrecipitationCell[];
+  nominalRainRate: number; // mm/hr
+  nominalCellSize: number; // km
+  nominalCoverage: number; // percentage (0-100%)
+}
+
+export interface IPrecipitationCell {
+  id: string;
+  center: IPosition2D;
+  size: number; // km (radius)
+  rainRate: number; // mm/hr (nominal at center)
+  intensity: number; // 0-1 scale
+}
+
+// ============================================================================
+// Session Types
+// ============================================================================
+
+export interface ISession {
+  id: string;
+  userId?: string;
+  createdAt: Date;
+  lastAccessedAt: Date;
+  activeSAMId?: string;
+  activeFighterId?: string;
+  activeScenarioId?: string;
+}
+
+// ============================================================================
+// Simulation Results
+// ============================================================================
+export interface IMissileResult{
+  id: string;
+  launchedBy: 'sam' | 'fighter';
+  launchTime: number; // seconds
+  timeOfImpact: number | null; // seconds
+  impactPosition: IPosition2D | null; // km
+  status: 'active' | 'kill' | 'missed';
+}
+
+export interface IMissileResults{
+  missiles: IMissileResult[];
+}
+
+
+export interface IEngagementResult {
+  scenarioId: string;
+  missileResults: IMissileResults;
+  success: boolean; // true if HARM kills SAM before SAM kills fighter
+  timestamp: Date;
+}
+
+// ============================================================================
+// ITU Data Types
+// ============================================================================
+
+// Standard ITU rain rate scale (mm/hr)
+export const ITU_RAIN_RATES = [0.01, 0.1, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60] as const;
+export type TITURainRate = typeof ITU_RAIN_RATES[number];
+
+export interface IITUData {
+  attenuationMatrix: number[][]; // 2D array: [frequencyIndex][rainRateIndex] = attenuation (dB/km)
+  frequencies: number[]; // Available frequencies (stepped by 0.2 GHz)
+  rainRates: readonly number[]; // Standard ITU rain rate scale
+  frequencyStart: number; // 5.0 GHz
+  frequencyStep: number; // 0.2 GHz
+  frequencyRange: [number, number]; // [min, max] GHz
+  rainRateRange: [number, number]; // [min, max] mm/hr
+}
+
+// ============================================================================
+// API Request/Response Types
+// ============================================================================
+
+export interface ICreatePlatformRequest {
+  type: 'sam' | 'fighter';
+  data: ISAMSystem | IFighterPlatform;
+}
+
+export interface ICreateScenarioRequest {
+  scenario: Omit<IScenario, 'id' | 'createdAt' | 'updatedAt'>;
+}
+
+export interface ISimulationRequest {
+  scenarioId: string;
+  samId: string;
+  fighterId: string;
+}
+
+export type TAPIResponse<T> = {
+  success: true;
+  data: T;
+} | {
+  success: false;
+  error: string;
+};

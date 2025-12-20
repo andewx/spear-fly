@@ -1,0 +1,18 @@
+{
+  "id": "fighter-f16",
+  "type": "F-16",
+  "velocity": 1.2,
+  "rcs": {
+    "nose": 1.2,
+    "tail": 3.5,
+    "side": 5.0,
+    "top": 4.0,
+    "bottom": 4.5
+  },
+  "harmParams": {
+    "velocity": 2.0,
+    "range": 150,
+    "launchPreference": "memrRatio",
+    "memrRatio": 0.85
+  }
+}

@@ -1,0 +1,142 @@
+<form data-overlay-form method="POST" data-method="PUT" action="/api/platforms/<%= platformType %>/<%= platform.id %>">
+  <div class="alert alert-warning small mb-3">
+    <strong>Editing:</strong> <%= platformType === 'sam' ? 'SAM System' : 'Fighter Aircraft' %> - <%= platform.name || platform.type %>
+  </div>
+  
+  <input type="hidden" name="type" value="<%= platformType %>">
+  
+  <% if (platformType === 'sam') { %>
+    <!-- SAM System Fields -->
+    <h6 class="text-primary mt-3">SAM System Configuration</h6>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">System ID</label>
+        <input type="text" name="sam_id" class="form-control bg-dark text-light border-secondary" value="<%= platform.id %>" readonly>
+        <small class="text-muted">ID cannot be changed</small>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" name="sam_name" class="form-control bg-dark text-light border-secondary" value="<%= platform.name %>" required>
+      </div>
+    </div>
+
+    <h6 class="text-secondary mt-3">Radar</h6>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Nominal Range (km)</label>
+        <input type="number" name="radar[nominalRange]" class="form-control bg-dark text-light border-secondary" value="<%= platform.nominalRange %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Frequency (GHz)</label>
+        <input type="number" step="0.1" name="radar[frequency]" class="form-control bg-dark text-light border-secondary" value="<%= platform.systemFrequency %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Pulse Model</label>
+        <select name="radar[pulseModel]" class="form-select bg-dark text-light border-secondary" required>
+          <option value="short" <%= platform.pulseModel === 'short' ? 'selected' : '' %>>Short</option>
+          <option value="medium" <%= platform.pulseModel === 'medium' ? 'selected' : '' %>>Medium</option>
+          <option value="long" <%= platform.pulseModel === 'long' ? 'selected' : '' %>>Long</option>
+        </select>
+      </div>
+    </div>
+
+    <h6 class="text-secondary mt-3">Acquisition</h6>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Manual Time (sec)</label>
+        <input type="number" name="acquisition[manualTime]" class="form-control bg-dark text-light border-secondary" value="<%= platform.manualAcquisitionTime %>" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Auto Time (sec)</label>
+        <input type="number" name="acquisition[autoTime]" class="form-control bg-dark text-light border-secondary" value="<%= platform.autoAcquisitionTime %>" required>
+      </div>
+    </div>
+
+    <h6 class="text-secondary mt-3">Missile</h6>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">MEMR (km)</label>
+        <input type="number" name="missile[memr]" class="form-control bg-dark text-light border-secondary" value="<%= platform.memr %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Velocity (Mach)</label>
+        <input type="number" step="0.1" name="missile[velocity]" class="form-control bg-dark text-light border-secondary" value="<%= platform.missileVelocity %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Tracking Radar (GHz)</label>
+        <input type="number" step="0.1" name="missile[trackingRadarFrequency]" class="form-control bg-dark text-light border-secondary" value="<%= platform.missileTrackingFrequency %>" required>
+      </div>
+    </div>
+  <% } else { %>
+    <!-- Fighter Aircraft Fields -->
+    <h6 class="text-primary mt-3">Fighter Aircraft Configuration</h6>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Aircraft ID</label>
+        <input type="text" name="fighter_id" class="form-control bg-dark text-light border-secondary" value="<%= platform.id %>" readonly>
+        <small class="text-muted">ID cannot be changed</small>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Type</label>
+        <select name="fighter_type" class="form-select bg-dark text-light border-secondary" required>
+          <option value="F-16" <%= platform.type === 'F-16' ? 'selected' : '' %>>F-16</option>
+          <option value="F-22" <%= platform.type === 'F-22' ? 'selected' : '' %>>F-22</option>
+          <option value="F-35" <%= platform.type === 'F-35' ? 'selected' : '' %>>F-35</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Velocity (Mach)</label>
+      <input type="number" step="0.1" name="fighter_velocity" class="form-control bg-dark text-light border-secondary" value="<%= platform.velocity %>" required>
+    </div>
+
+    <h6 class="text-secondary mt-3">RCS Profile (m²)</h6>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Nose</label>
+        <input type="number" step="0.0001" name="rcs[nose]" class="form-control bg-dark text-light border-secondary" value="<%= platform.rcs.nose %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Tail</label>
+        <input type="number" step="0.1" name="rcs[tail]" class="form-control bg-dark text-light border-secondary" value="<%= platform.rcs.tail %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Side</label>
+        <input type="number" step="0.1" name="rcs[side]" class="form-control bg-dark text-light border-secondary" value="<%= platform.rcs.side %>" required>
+      </div>
+    </div>
+
+    <h6 class="text-secondary mt-3">HARM</h6>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Velocity (Mach)</label>
+        <input type="number" step="0.1" name="harm[velocity]" class="form-control bg-dark text-light border-secondary" value="<%= platform.harmParams.velocity %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Range (km)</label>
+        <input type="number" name="harm[range]" class="form-control bg-dark text-light border-secondary" value="<%= platform.harmParams.range %>" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Launch Strategy</label>
+        <select name="harm[launchStrategy][type]" class="form-select bg-dark text-light border-secondary" required>
+          <option value="maxRange" <%= platform.harmParams.launchPreference === 'maxRange' ? 'selected' : '' %>>Max Range</option>
+          <option value="memrRatio" <%= platform.harmParams.launchPreference === 'memrRatio' ? 'selected' : '' %>>MEMR Ratio</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">MEMR Ratio (0-1, if using ratio strategy)</label>
+      <input type="number" step="0.01" name="harm[launchStrategy][memrRatio]" class="form-control bg-dark text-light border-secondary" value="<%= platform.harmParams.memrRatio || 0.85 %>">
+    </div>
+  <% } %>
+
+  <div class="d-flex gap-2 mt-4">
+    <button type="submit" class="btn btn-primary flex-fill">
+      <i class="bi bi-save"></i> Update Platform
+    </button>
+    <button type="button" class="btn btn-secondary" onclick="closeOverlay()">Cancel</button>
+  </div>
+</form>

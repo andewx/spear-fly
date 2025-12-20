@@ -1,0 +1,98 @@
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card bg-dark border-secondary">
+      <div class="card-body">
+        <h5 class="card-title text-primary">Visualization</h5>
+        <!-- Radar Canvas - Add bluejs bindings for zoom and click pan -->
+        <canvas id="radarCanvas" width="1024" height="1024"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-4">
+    <!-- Controls Panel -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header bg-secondary">
+        <h6 class="mb-0">Engagement Scenario</h6>
+      </div>
+      <div class="card-body">
+        
+        <div class="mb-3">
+          <label for="scenarioSelect" class="form-label">Scenario</label>
+          <select id="scenarioSelect" 
+                  bluejs="select-scenario" 
+                  bluejs-trigger="change" 
+                  bluejs-binding="selectScenario"
+                  class="form-select bg-dark text-light border-secondary">
+            <option value="">Select Scenario...</option>
+            <% if (scenarios && scenarios.length > 0) { %>
+              <% scenarios.forEach(scenario => { %>
+                <option value="<%= scenario.id %>"><%= scenario.name %></option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+        
+        <div class="d-grid gap-2">
+          <button bluejs="btn-generate-precip" bluejs-trigger="click" bluejs-binding="generatePrecipitation" class="btn btn-primary" type="button">
+            <span id="genPrecipBtnText">Generate Precipitation Field</span>
+            <span id="genPrecipBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </span>
+          </button>
+
+
+          <button bluejs="btn-run-sim" bluejs-trigger="click" bluejs-binding="runSimulation" class="btn btn-primary" type="button">
+            <span id="runSimBtnText">Run Simulation</span>
+            <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </span>
+          </button>
+          <button id="resetBtn" class="btn btn-secondary" type="button">Reset</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Results Panel -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header bg-secondary">
+        <h6 class="mb-0">Results</h6>
+      </div>
+      <div class="card-body">
+        <div id="resultsPanel" class="text-muted small">
+          <p>No simulation run yet</p>
+        </div>
+      </div>
+    </div>
+
+   <!-- Editor Panel -->
+     <div class="card bg-dark border-secondary">
+        <div class="card-header bg-secondary">
+         <h6 class="mb-0"><i class="bi bi-gear"></i> Editor</h6>
+        </div>
+        <div class="card-body">
+          <div id="editorPanel" class="text-muted small">
+            <div class="text-center py-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 mb-0">Loading data...</p>
+            </div>
+          </div>
+          <div class="d-grid gap-2 mt-3">
+            <button bluejs="btn-create-platform-home" bluejs-trigger="click" bluejs-binding="createPlatform" class="btn btn-sm btn-outline-primary" type="button">
+              <i class="bi bi-plus-circle"></i> Create Platform
+            </button>
+            <button bluejs="btn-create-scenario-home" bluejs-trigger="click" bluejs-binding="createScenario" class="btn btn-sm btn-outline-success" type="button">
+              <i class="bi bi-plus-circle"></i> Create Scenario
+            </button>
+          </div>
+        </div>
+     </div>
+
+
+  </div>
+</div>
+
+
+

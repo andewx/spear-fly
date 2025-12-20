@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPEAR - Synthetic Precipitative Environmental Attenuation Radar</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header class="navbar navbar-dark sticky-top">
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0 h1">
+        <span class="radar-icon">📡</span> SPEAR
+      </span>
+      <span class="navbar-text">
+        Synthetic Precipitative Environmental Attenuation Radar
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container-fluid main-container">
+    <div class="row h-100">
+      
+      <!-- Left Panel - Controls -->
+      <div class="col-md-3 control-panel">
+        <div class="panel-section">
+          <h5>Platform Selection</h5>
+          <div class="mb-3">
+            <label class="form-label">SAM System</label>
+            <select id="samSelect" class="form-select">
+              <option value="">Select SAM...</option>
+            </select>
+            <button id="createSAM" class="btn btn-sm btn-outline-primary mt-2 w-100">
+              Create New SAM
+            </button>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Fighter Platform</label>
+            <select id="fighterSelect" class="form-select">
+              <option value="">Select Fighter...</option>
+            </select>
+            <button id="createFighter" class="btn btn-sm btn-outline-primary mt-2 w-100">
+              Create New Fighter
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <h5>Scenario</h5>
+          <div class="mb-3">
+            <select id="scenarioSelect" class="form-select">
+              <option value="">Select Scenario...</option>
+            </select>
+            <button id="createScenario" class="btn btn-sm btn-outline-primary mt-2 w-100">
+              Create New Scenario
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <h5>Simulation</h5>
+          <button id="runSimulation" class="btn btn-primary w-100 mb-3">
+            Run Simulation
+          </button>
+          
+          <div id="resultsPanel" class="results-panel" style="display: none;">
+            <h6>Results</h6>
+            <div class="result-item">
+              <span class="label">Detection Range:</span>
+              <span id="detectionRange" class="value">-</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Path Attenuation:</span>
+              <span id="pathAttenuation" class="value">-</span>
+            </div>
+            <div class="result-item">
+              <span class="label">SAM Kill Time:</span>
+              <span id="samKillTime" class="value">-</span>
+            </div>
+            <div class="result-item">
+              <span class="label">HARM Kill Time:</span>
+              <span id="harmKillTime" class="value">-</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Outcome:</span>
+              <span id="outcome" class="value">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Visualization -->
+      <div class="col-md-9 visualization-panel">
+        <div class="canvas-container">
+          <canvas id="radarCanvas"></canvas>
+        </div>
+        
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background: #ff4444;"></span>
+            <span>SAM Position</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #4444ff;"></span>
+            <span>Fighter Position</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgba(255, 255, 100, 0.3);"></span>
+            <span>Detection Range</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgba(255, 100, 100, 0.2);"></span>
+            <span>MEMR Circle</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgba(100, 200, 255, 0.4);"></span>
+            <span>Precipitation Cells</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Application JS -->
+  <script src="/js/api.js"></script>
+  <script src="/js/visualization.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

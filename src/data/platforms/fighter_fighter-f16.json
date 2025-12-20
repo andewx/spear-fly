@@ -1,0 +1,33 @@
+{
+  "sam_id": "sam-s400",
+  "sam_name": "S-400 Triumf",
+  "harm[launchStrategy][type]": "maxRange",
+  "harm[launchStrategy][memrRatio]": "0.85",
+  "radar": {
+    "nominalRange": "250",
+    "frequency": "6.0",
+    "pulseModel": "medium"
+  },
+  "acquisition": {
+    "manualTime": "20",
+    "autoTime": "5"
+  },
+  "missile": {
+    "memr": "380",
+    "velocity": "12.0",
+    "trackingRadarFrequency": "10.0"
+  },
+  "rcs": {
+    "nose": "1.2",
+    "tail": "3.5",
+    "side": "5.0"
+  },
+  "id": "fighter-f16",
+  "type": "F-16",
+  "velocity": "1.2",
+  "harmParams": {
+    "velocity": "2.0",
+    "range": "150",
+    "launchPreference": "maxRange"
+  }
+}

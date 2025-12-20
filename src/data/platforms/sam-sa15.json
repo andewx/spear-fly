@@ -1,0 +1,18 @@
+{
+  "id": "sam-sa15",
+  "name": "SA-15 Gauntlet (Tor-M1)",
+  "radar": {
+    "nominalRange": 25,
+    "frequency": 15.0,
+    "pulseModel": "medium"
+  },
+  "acquisition": {
+    "manualTime": 10,
+    "autoTime": 3
+  },
+  "missile": {
+    "memr": 12,
+    "velocity": 2.8,
+    "trackingRadarFrequency": 15.0
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "sam-patriot",
+  "name": "MIM-104 Patriot",
+  "radar": {
+    "nominalRange": 170,
+    "frequency": 5.5,
+    "pulseModel": "long"
+  },
+  "acquisition": {
+    "manualTime": 15,
+    "autoTime": 4
+  },
+  "missile": {
+    "memr": 160,
+    "velocity": 5.0,
+    "trackingRadarFrequency": 10.0
+  }
+}
