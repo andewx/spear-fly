@@ -23,7 +23,24 @@ export declare class SimulationController {
      * Execute engagement simulation
      */
     run(req: Request, res: Response): Promise<void>;
+    /**
+     * POST /api/simulation/step
+     * Advance simulation by one time step and return current state
+     */
     step(req: Request, res: Response): Promise<void>;
+    /**
+     * GET /api/simulation/state
+     * Get current simulation state without advancing time step
+     */
+    getState(req: Request, res: Response): Promise<void>;
+    /**
+     * Extract current simulation state for visualization
+     */
+    private getSimulationState;
+    /**
+     * Calculate azimuth from SAM to Fighter
+     */
+    private calculateAzimuth;
     reset(req: Request, res: Response): Promise<void>;
     /**
      * GET /api/simulation/sam/nominal-ranges

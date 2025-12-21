@@ -53,6 +53,15 @@ export declare class Radar {
      */
     calculateDetectionRangeWithPrecipitationFieldSampling(rcs: number, position: IPosition2D, azimuth: number, scenario: IScenario): number;
     /**
+     * Sample rain rate using bilinear interpolation for smooth values
+     * Returns null if position is outside image bounds
+     */
+    private sampleRainRateBilinear;
+    /**
+     * Get pixel intensity (average of RGB) at given coordinates
+     */
+    private getPixelIntensity;
+    /**
      * Position to image coordinates
      */
     private worldToImageCoordinates;

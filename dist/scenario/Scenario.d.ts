@@ -39,6 +39,7 @@ export declare class Scenario {
     advanceSimulationTimeStep(): boolean;
     resetScenario(): void;
     getTimeElapsed(): number;
+    getMissiles(): Array<TMissile>;
     engagementResult(): IEngagementResult;
     /**
      * Apply RCS and Pulse Integration to array and return array
@@ -61,6 +62,8 @@ export declare class Scenario {
      * Get fighter RCS as seen from SAM position
      */
     getFighterRCSFromSAM(): number;
+    getRangeAtAzimuth(azimuthDeg: number): number;
+    isWithinMEMR(distance: number): boolean;
     /**
      * Need to check between time steps if either missile intercepted its target
      * by raycast method

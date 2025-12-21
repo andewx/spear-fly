@@ -233,9 +233,9 @@ export class Scenario {
     getTimeElapsed() {
         return this.timeElapsed;
     }
-    /* EngagementResult method returns IEngagementResult with details of the engagement
-    including kill times, missile paths, and detection events
-    */
+    getMissiles() {
+        return this.missiles;
+    }
     engagementResult() {
         let missileResultsArray = [];
         for (const missile of this.missiles) {
@@ -304,6 +304,15 @@ export class Scenario {
      */
     getFighterRCSFromSAM() {
         return this.fighter.getRCSFromPosition(this.scenario.platforms.fighter.position, this.scenario.platforms.sam.position, this.scenario.platforms.fighter.heading);
+    }
+    getRangeAtAzimuth(azimuthDeg) {
+        const azimuths = this.samSystem.getRangesAzimuth();
+        const numAzimuths = azimuths.length;
+        const azimuthIndex = Math.round(((azimuthDeg % 360) / 360) * numAzimuths) % numAzimuths;
+        return azimuths[azimuthIndex];
+    }
+    isWithinMEMR(distance) {
+        return distance <= this.samSystem.properties.memr;
     }
     /**
      * Need to check between time steps if either missile intercepted its target

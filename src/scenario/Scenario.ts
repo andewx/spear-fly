@@ -300,9 +300,10 @@ getTimeElapsed(): number {
     return this.timeElapsed; 
 }
 
-/* EngagementResult method returns IEngagementResult with details of the engagement
-including kill times, missile paths, and detection events
-*/
+  getMissiles(): Array<TMissile> {
+    return this.missiles;
+  }
+
 engagementResult(): IEngagementResult {
   
   let missileResultsArray = [];
@@ -391,6 +392,18 @@ engagementResult(): IEngagementResult {
       this.scenario.platforms.sam.position,
       this.scenario.platforms.fighter.heading
     );
+  }
+
+
+  getRangeAtAzimuth(azimuthDeg:number):number {
+    const azimuths = this.samSystem.getRangesAzimuth();
+    const numAzimuths = azimuths.length;
+    const azimuthIndex = Math.round(((azimuthDeg % 360) / 360) * numAzimuths) % numAzimuths;
+    return azimuths[azimuthIndex];
+  }
+
+  isWithinMEMR(distance: number): boolean {
+    return distance <= this.samSystem.properties.memr;
   }
 
   /**

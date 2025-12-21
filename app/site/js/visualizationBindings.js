@@ -6,7 +6,7 @@ let canvasPanActive = false;
 
 function zoomWheel(event) {
     event.preventDefault();
-    const zoomFactor = 1.1;
+    const zoomFactor = 1.01;
     if (event.deltaY < 0) {
         visualization.currentZoom *= zoomFactor;
     } else {

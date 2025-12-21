@@ -166,7 +166,7 @@ function viewScenario(e) {
 /**
  * Handle scenario selection from dropdown
  */
-function selectScenario(e) {
+async function selectScenario(e) {
   const scenarioId = e?.currentTarget?.value;
   
   if (!scenarioId) {
@@ -190,7 +190,17 @@ function selectScenario(e) {
       if (typeof visualization !== 'undefined' && visualization.setScenario) {
         visualization.setScenario(selectedScenario);
       }
-      
+
+      // Init Simulation State
+      appState.simulationKey = null;
+      await initSimulation(scenarioId);
+      await getRangeProfile(scenarioId);
+
+            // Visualization Render with updated range profile
+      if (typeof visualization !== 'undefined' && visualization.render) {
+          visualization.render();
+      }
+          
       console.log('Selected Scenario:', selectedScenario.name);
     } else {
       console.error('Scenario not found:', scenarioId);
@@ -249,9 +259,7 @@ async function generatePrecipitation(e) {
     }
     
     const result = await response.json();
-    
-    // Show success message
-    alert(`Precipitation field generated successfully!\nImage: ${result.data.imageFilename}`);
+    console.log('Precipitation field generated successfully:', result.data);
     
     // Reload page to update visualization
     window.location.reload();
@@ -266,34 +274,6 @@ async function generatePrecipitation(e) {
       btn.innerHTML = originalText;
     }
   }
-}
-
-
-async function initSimulation(scenarioId){
- 
-    try {
-    const response = await fetch('/api/simulation/init', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-         scenarioId,
-         timeStep: 0.5, // default time step
-      }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Simulation failed');
-    }
-    
-    const resultInit = await response.json();
-    appState.simulationKey = resultInit.data.simulationKey;
-    console.log('Simulation initialized with key:', appState.simulationKey);
-    } catch (error) {
-        console.error('Error initializing simulation:', error);
-    }
 }
 
 // ============================================================================
@@ -346,13 +326,7 @@ async function stepSimulation(e) {
   const btnText = document.getElementById('stepSimBtnText');
   const btnSpinner = document.getElementById('stepSimBtnSpinner');
 
-  await initSimulation(scenarioId);
-  await getRangeProfile(scenarioId);
 
-  // Visualization Render with updated range profile
-  if (typeof visualization !== 'undefined' && visualization.render) {
-      visualization.render();
-  }
   
   try {
     // Show loading state
@@ -421,8 +395,8 @@ async function runSimulation(e) {
   const btnText = document.getElementById('btnText');
   const btnSpinner = document.getElementById('btnSpinner');
 
-  await initSimulation(scenarioId);
-  await getRangeProfile(scenarioId);
+  //await initSimulation(scenarioId);
+  //await getRangeProfile(scenarioId);
 
   // Visualization Render with updated range profile
   if (typeof visualization !== 'undefined' && visualization.render) {

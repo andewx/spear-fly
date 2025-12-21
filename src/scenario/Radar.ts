@@ -150,119 +150,209 @@ export class Radar {
     }
 
     try {
- 
-      // World Position at (0,0) is considered center of image apply position transformation to image coordinates
-      const samImagePos = this.worldToImageCoordinates(position,scenario);
       const pixelsPerKm = scenario.grid.resolution; // pixels per km
       const kmPerPixel = 1 / pixelsPerKm;
       const maxRangeKm = this.nominalRange; // Sample out to nominal range
-      const rangeStepKm = kmPerPixel * 1.5; // Sample at approx 1.5 pixel intervals
+      const rangeStepKm = kmPerPixel * 1.0; // Sample at approx 1.5 pixel intervals
       const NRay = Math.ceil(maxRangeKm / rangeStepKm);
-      let resultRange: number = this.nominalRange;
 
       //Scenario max precipitation rate
       const maxPrecipitationRate = scenario.environment.precipitation.maxRainRateCap || 35; // mm/hr
 
-      // Total gains losses
-      let totalSystemGainDb = 0;
-
+      // Total accumulated attenuation in dB (two-way path)
+      let totalAttenuationDb = 0;
+      
+      // Calculate base detection range for this RCS (without attenuation)
+      const baseDetectionRange = this.nominalRange
 
       const azRad = this.degToRad(azimuth);
-      let adjustedRange = this.nominalRange;
+      let detectionRange = baseDetectionRange;
 
+      // Cast ray from radar position outward in azimuth direction
       for (let iray = 0; iray < NRay; iray++) {
-
-        //Break condition if our sampling range and greater than the adjusted range
-        const currentRangeKm = (iray+1) * rangeStepKm;
-        if (currentRangeKm >= adjustedRange) {
-          resultRange = currentRangeKm; // Last valid range before exceeding adjusted range
+        const currentRangeKm = (iray + 1) * rangeStepKm;
+        
+        // Calculate what the adjusted detection range is with attenuation accumulated so far
+        // Range reduction: R_attenuated = R_base * 10^(-attenuation_dB / 40)
+        // totalAttenuationDb is POSITIVE, so we need the negative sign in the exponent
+        const adjustedDetectionRange = baseDetectionRange * Math.pow(10, -totalAttenuationDb / 40);
+        
+        // If we've propagated beyond where we can detect, stop here
+        if (currentRangeKm > adjustedDetectionRange) {
+          detectionRange = adjustedDetectionRange;
           break;
         }
-
+        
+        // Calculate world position along ray from radar position
         const offsetX = currentRangeKm * Math.cos(azRad);
         const offsetY = currentRangeKm * Math.sin(azRad);
-        const worldPos = { x: offsetX, y:offsetY };
-        const imgPos = this.worldToImageCoordinates(worldPos, scenario);
-
-        // Sample pixel color to determine rain rate
-        if (imgPos.ix >= 0 && imgPos.ix < scenario.grid.width && imgPos.iy >= 0 && imgPos.iy < scenario.grid.height) {
-          const pixelIndex = (imgPos.iy * scenario.grid.width + imgPos.ix) * 4;
-          const r = this.imageData.data[pixelIndex];
-          const g = this.imageData.data[pixelIndex + 1];
-          const b = this.imageData.data[pixelIndex + 2];
-          // Assuming grayscale image where intensity maps to rain rate
-          //Calculate intensity as magnitude of RGB vector
-
-          const intensity = (r+g+b)/3; // 0-255
-          const rainRate = (intensity / 255) * maxPrecipitationRate; // Map to 0-35 mm/hr
-          let attenuationDb = 0;
-          if (rainRate > 0) {
+        const worldPos = { 
+          x: position.x + offsetX, 
+          y: position.y + offsetY 
+        };
+        
+        // Sample rain rate using bilinear interpolation for smooth values
+        const rainRate = this.sampleRainRateBilinear(worldPos, scenario, maxPrecipitationRate);
+        
+        if (rainRate !== null) {
+          // Accumulate attenuation only if there's significant rain
+          if (rainRate > 1.0) { // Threshold to avoid noise
             const specificAttenuation = this.getSpecificAttenuation(rainRate); // dB/km
-            attenuationDb = 2*(specificAttenuation * rangeStepKm);
-            totalSystemGainDb -= attenuationDb;
+            // Two-way path: signal travels to target and back
+            const stepAttenuationDb = (specificAttenuation * rangeStepKm);
+            totalAttenuationDb += stepAttenuationDb;
           }
-        adjustedRange = this.nominalRange * this.rangeDeltaFromDecibels(totalSystemGainDb);
         }
+        
+        // Update detection range for next iteration
+        detectionRange = adjustedDetectionRange;
       }
-      return resultRange
+      
+      return detectionRange;
+      
     } catch (error) {
-      console.error('Failed to load precipitation image:', error);
-      // Fall back to unattenuated range if image load fails
-      return this.nominalRange;
+      console.error('Failed to sample precipitation field:', error);
+      // Fall back to unattenuated range if sampling fails
+      return this.calculateDetectionRange(rcs, 1.0, this.nominalRange);
     }
   }
 
+
+  /**
+   * Sample rain rate using bilinear interpolation for smooth values
+   * Returns null if position is outside image bounds
+   */
+  private sampleRainRateBilinear(position: {x: number, y: number}, scenario: IScenario, maxPrecipitationRate: number): number | null {
+    if (!this.imageData) return null;
+    
+    const resolution = scenario.grid.resolution;
+    const gridWidthKm = scenario.grid.width;
+    const gridHeightKm = scenario.grid.height;
+    const widthPixels = gridWidthKm * resolution;
+    const heightPixels = gridHeightKm * resolution;
+    
+    const originX = scenario.grid.origin?.x || 0;
+    const originY = scenario.grid.origin?.y || 0;
+    
+    // Get continuous pixel coordinates (with fractional part)
+    const centerPixelX = widthPixels / 2;
+    const centerPixelY = heightPixels / 2;
+    const px = centerPixelX + (position.x - originX) * resolution;
+    const py = centerPixelY + (position.y - originY) * resolution; // Y axis is inverted in display visualization so we match here
+    
+    // Check bounds (need 1-pixel margin for interpolation)
+    if (px < 0 || px >= widthPixels - 1 || py < 0 || py >= heightPixels - 1) {
+      return null;
+    }
+    
+    // Get the four surrounding pixel coordinates
+    const x0 = Math.floor(px);
+    const y0 = Math.floor(py);
+    const x1 = x0 + 1;
+    const y1 = y0 + 1;
+    
+    // Get fractional parts for interpolation weights
+    const fx = px - x0;
+    const fy = py - y0;
+    
+    // Sample four surrounding pixels
+    const intensity00 = this.getPixelIntensity(x0, y0, widthPixels);
+    const intensity10 = this.getPixelIntensity(x1, y0, widthPixels);
+    const intensity01 = this.getPixelIntensity(x0, y1, widthPixels);
+    const intensity11 = this.getPixelIntensity(x1, y1, widthPixels);
+    
+    // Bilinear interpolation
+    const intensity0 = intensity00 * (1 - fx) + intensity10 * fx;
+    const intensity1 = intensity01 * (1 - fx) + intensity11 * fx;
+    const intensity = intensity0 * (1 - fy) + intensity1 * fy;
+    
+    // Map interpolated intensity to rain rate
+    return (intensity / 255) * maxPrecipitationRate;
+  }
+  
+  /**
+   * Get pixel intensity (average of RGB) at given coordinates
+   */
+  private getPixelIntensity(x: number, y: number, width: number): number {
+    if (!this.imageData) return 0;
+    
+    const pixelIndex = (y * width + x) * 4;
+    if (pixelIndex + 2 >= this.imageData.data.length) return 0;
+    
+    const r = this.imageData.data[pixelIndex];
+    const g = this.imageData.data[pixelIndex + 1];
+    const b = this.imageData.data[pixelIndex + 2];
+    
+    return (r + g + b) / 3;
+  }
 
   /**
    * Position to image coordinates
    */
 
   private worldToImageCoordinates(position: {x: number, y: number}, scenario: IScenario): {ix: number, iy: number} {
-    // Assuming scenario.grid defines the mapping from world to image coordinates
+    // World coordinates: origin at center, Y increases upward
+    // Image coordinates: origin at top-left, Y increases downward
 
     let originX = 0;
     let originY = 0;
     if (scenario.grid.origin !== undefined) {
       originX = scenario.grid.origin.x;
       originY = scenario.grid.origin.y;
-      console.log(`World to Image Origin: (${originX}, ${originY})\n`);
     }
 
     const resolution = scenario.grid.resolution; // pixels per km
-    const width = scenario.grid.width * resolution;
-    const height = scenario.grid.height * resolution;
-    //Image coordinates are top-left origin - transform accordingly
-    const centerPixelCoordinate = {x: Math.floor(width/2), y: Math.floor(height/2)};
-    const centerWorldCoordinate = {x: originX, y: originY};
-    let ix = centerPixelCoordinate.x + Math.floor((position.x - originX) * resolution);
-    let iy = centerPixelCoordinate.y - Math.floor((position.y - originY) * resolution);
+    const gridWidthKm = scenario.grid.width;    // grid width in km
+    const gridHeightKm = scenario.grid.height;  // grid height in km
+    const widthPixels = gridWidthKm * resolution;
+    const heightPixels = gridHeightKm * resolution;
+    
+    // Center of image in pixel coordinates
+    const centerPixelX = Math.floor(widthPixels / 2);
+    const centerPixelY = Math.floor(heightPixels / 2);
+    
+    // Transform world position relative to origin, then to pixel coordinates
+    // X: positive world X = positive pixel offset from center
+    // Y: positive world Y = positive pixel offset from center (flip Y axis)
+    let ix = centerPixelX + Math.floor((position.x - originX) * resolution);
+    let iy = centerPixelY + Math.floor((position.y - originY) * resolution); //image is flipped vertically in visualization so we match here
 
-    if (ix < 0 || ix >= width || iy < 0 || iy >= height) {
-      console.warn(`Position (${position.x}, ${position.y}) maps outside image bounds to (${ix}, ${iy})`);
-      if (ix < 0 || ix >= width) {
-        ix = 0;
-      }
-
-      if (iy < 0 || iy >= height) {
-        iy = 0;
-      }
+    // Clamp to image bounds
+    if (ix < 0 || ix >= widthPixels || iy < 0 || iy >= heightPixels) {
+      console.warn(`Position (${position.x.toFixed(1)}, ${position.y.toFixed(1)}) km maps outside image bounds to pixel (${ix}, ${iy})`);
+      ix = Math.max(0, Math.min(widthPixels - 1, ix));
+      iy = Math.max(0, Math.min(heightPixels - 1, iy));
     }
     return { ix, iy };
   }
 
   private imageToWorldCoordinates(ix: number, iy: number, scenario: IScenario): {x: number, y: number} {
+    // Image coordinates: origin at top-left, Y increases downward  
+    // World coordinates: origin at center, Y increases upward
+    
     let originX = 0;
     let originY = 0;
     if (scenario.grid.origin !== undefined) {
       originX = scenario.grid.origin.x;
       originY = scenario.grid.origin.y;
     }
+    
     const resolution = scenario.grid.resolution; // pixels per km
-    const width = scenario.grid.width * scenario.grid.resolution;
-    const height = scenario.grid.height * scenario.grid.resolution;
-    const topLeftWorldCoordinate = {x: originX - ((scenario.grid.width/2)), y: originY + (scenario.grid.height/2)};
-    const x = (ix / resolution) + topLeftWorldCoordinate.x;
-    const y = topLeftWorldCoordinate.y - (iy / resolution);
+    const gridWidthKm = scenario.grid.width;    // grid width in km
+    const gridHeightKm = scenario.grid.height;  // grid height in km
+    const widthPixels = gridWidthKm * resolution;
+    const heightPixels = gridHeightKm * resolution;
+    
+    // Center of image in pixel coordinates
+    const centerPixelX = Math.floor(widthPixels / 2);
+    const centerPixelY = Math.floor(heightPixels / 2);
+    
+    // Convert pixel offset from center to world coordinates
+    // X: positive pixel offset = positive world X
+    // Y: positive pixel offset = negative world Y (flip Y axis)
+    const x = originX + (ix - centerPixelX) / resolution;
+    const y = originY - (iy - centerPixelY) / resolution;
+    
     return { x, y };
   }
 

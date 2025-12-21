@@ -134,12 +134,65 @@ const scenarioAPI = {
 
 const simulationAPI = {
   /**
-   * Run simulation
+   * Initialize simulation with scenario
    */
-  async run(scenarioId, samId, fighterId) {
+  async init(scenarioId, timeStep = 0.5) {
+    return fetchAPI('/simulation/init', {
+      method: 'POST',
+      body: JSON.stringify({ scenarioId, timeStep }),
+    });
+  },
+
+  /**
+   * Run full simulation (all steps at once)
+   */
+  async run(simulationKey) {
     return fetchAPI('/simulation/run', {
       method: 'POST',
-      body: JSON.stringify({ scenarioId, samId, fighterId }),
+      body: JSON.stringify({ simulationKey }),
+    });
+  },
+
+  /**
+   * Advance simulation by one time step
+   */
+  async step(simulationKey) {
+    return fetchAPI('/simulation/step', {
+      method: 'POST',
+      body: JSON.stringify({ simulationKey }),
+    });
+  },
+
+  /**
+   * Get current simulation state without stepping
+   */
+  async getState() {
+    return fetchAPI('/simulation/state');
+  },
+
+  /**
+   * Reset simulation to initial state
+   */
+  async reset() {
+    return fetchAPI('/simulation/reset', {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Get SAM nominal ranges profile
+   */
+  async getNominalRanges() {
+    return fetchAPI('/simulation/sam/nominal-ranges');
+  },
+
+  /**
+   * Get SAM precipitation-attenuated ranges profile
+   */
+  async getPrecipRanges() {
+    return fetchAPI('/simulation/getRanges', {
+      method: 'POST',
     });
   },
 };
+

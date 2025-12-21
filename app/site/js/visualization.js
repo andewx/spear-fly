@@ -456,7 +456,7 @@ class RadarVisualization {
     const centerPixelCoordinate = {x: Math.floor(width/2)*resolution, y: Math.floor(height/2)*resolution};
     const centerWorldCoordinate = {x: originX, y: originY};
     let ix = centerPixelCoordinate.x + Math.floor((position.x - originX) * resolution);
-    let iy = centerPixelCoordinate.y - Math.floor((position.y - originY) * resolution);
+    let iy = centerPixelCoordinate.y + Math.floor((position.y - originY) * resolution);
 
     if (ix < 0 || ix >= width || iy < 0 || iy >= height) {
       console.warn(`Position (${position.x}, ${position.y}) maps outside image bounds to (${ix}, ${iy})`);

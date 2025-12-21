@@ -74,6 +74,10 @@ router.post('/simulation/init',(req, res) => {
     simulationController.initialize(req, res);
 });
 
+router.get('/simulation/state', (req, res) => {
+    simulationController.getState(req, res);
+});
+
 router.post('/simulation/getRanges', (req, res) => {
     simulationController.getPrecipRangesProfile(req, res);
 });
