@@ -19,7 +19,9 @@ async function ensureDir(dirPath: string): Promise<void> {
   try {
     await fs.access(dirPath);
   } catch {
+    try{
     await fs.mkdir(dirPath, { recursive: true });
+    }catch(e){console.log("No Directory services available in SPEAR\n");
   }
 }
 
