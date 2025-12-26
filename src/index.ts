@@ -231,11 +231,12 @@ const main = async (): Promise<void> => {
     // List directories associated with current working
     process.stdout.write("Listing directories available from current");
     const currentDir = process.cwd();
-   await storage.listDirectories(currentDir);
-
+    const dirsC = await storage.listDirectories(currentDir);
+    console.log(dirsC);
     process.stdout.write("Listing root / directories available");
     const rootDir = "/";
-    await storage.listDirectories(rootDir);
+    const dirsR = await storage.listDirectories(rootDir);
+    console.log(dirsR);
     // Initialize data directories
     process.stdout.write('Initializing data directories...\n');
     await storage.initializeDataDirectories();
