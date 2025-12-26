@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for spear-hpsu2w on 2025-12-25T23:59:54Z
+# fly.toml app configuration file generated for spear-fly on 2025-12-26T00:47:44Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'spear-hpsu2w'
-primary_region = 'ord'
+app = 'spear-fly'
+primary_region = 'iad'
 
 [build]
 
