@@ -40,7 +40,7 @@ export async function loadITUData(): Promise<IITUData> {
   let csvFile: string | undefined;
   let ituDir: string;
   try{
-     ituDir = path.join(__dirname, '..', 'data', 'itu'); // Local development directory
+     ituDir = path.join(__dirname, '..','..', 'data', 'itu'); // Local development directory
      const files = await fs.readdir(ituDir);
      csvFile = files.find(f => f.endsWith('.csv'));
   } catch (error) {
