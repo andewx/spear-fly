@@ -13,7 +13,7 @@ const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');
 
 
-async function listDirectories(dirPath: string): Promise<string[]> {
+export async function listDirectories(dirPath: string): Promise<string[]> {
   const dirents = await fs.readdir(dirPath);
   const directories:  string[] = [];
   
