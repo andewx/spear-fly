@@ -74,8 +74,14 @@ app.use((err, _req, res, _next) => {
 // ============================================================================
 /**
  * Initialize readline interface for interactive commands
+ * Only initializes if running in an interactive terminal (TTY)
  */
 function initializeCommandInterface() {
+    // Check if stdin is a TTY (interactive terminal)
+    if (!process.stdin.isTTY) {
+        process.stdout.write('[INFO] Non-interactive mode detected (no TTY). Readline disabled.\n');
+        return null;
+    }
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -166,7 +172,9 @@ async function reloadData() {
  */
 async function shutdown(rl) {
     process.stdout.write('\nShutting down server...\n');
-    rl.close();
+    if (rl) {
+        rl.close();
+    }
     if (server) {
         server.close(() => {
             process.stdout.write('Server closed.\n');
@@ -212,10 +220,15 @@ const main = async () => {
             process.stdout.write(`  - POST   /api/synthetic/precipitation\n`);
             process.stdout.write(`  - GET    /api/synthetic/precipitation/:filename\n`);
             process.stdout.write('================================================================\n');
-            process.stdout.write('Type "help" for available commands\n\n');
-            // Initialize command interface
+            // Initialize command interface only if TTY available
             const rl = initializeCommandInterface();
-            rl.prompt();
+            if (rl) {
+                process.stdout.write('Type "help" for available commands\n\n');
+                rl.prompt();
+            }
+            else {
+                process.stdout.write('Running in production mode (no interactive commands)\n\n');
+            }
         });
         // Handle process signals for graceful shutdown
         process.on('SIGINT', async () => {
