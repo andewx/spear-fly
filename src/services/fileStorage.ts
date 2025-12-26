@@ -5,9 +5,14 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import type { ISAMSystem, IFighterPlatform, IScenario, ISession } from '../types/index.js';
 
-const DATA_DIR = process.env.DATA_DIR || '/data';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Default to /app/data in production, src/data in development
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', '..', 'data');
 const PLATFORMS_DIR = path.join(DATA_DIR, 'platforms');
 const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');

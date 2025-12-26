@@ -30,10 +30,14 @@
 
 ### Development Workflow
 - **Dev**: `npm run dev` - nodemon watches `/src`, rebuilds on `.ts/.json/.ejs` changes, runs `dist/index.js`
-- **Build**: `npm run build` - `tsc && copy:templates && copy:data` (copies templates + data to dist/)
+- **Build**: `npm run build` - `tsc && copy:templates` (copies templates to dist/)
 - **Production**: `npm start` - runs `node dist/index.js` (port 3000, override with `PORT` env var)
 - **Debug**: `npm run debug` - runs with `--inspect-brk=9229` for breakpoints
-- **Docker**: Multi-stage Dockerfile (node:22 build, node:22-slim runtime, exposes port 3000)
+- **Docker**: Multi-stage Dockerfile (node:22 build, node:22-slim runtime)
+  - **Working directory**: `/app` in container
+  - **Data location**: `/app/data` (set via `DATA_DIR=/app/data` env var)
+  - **Static assets**: `/app/app/site` copied to production image
+  - **User**: Runs as `node` user with proper permissions on `/app/data`
 
 ### ES Modules Configuration
 **Critical**: This project uses ES modules (`"type": "module"` in package.json), NOT CommonJS.
@@ -129,12 +133,16 @@ openOverlay('/forms/platform/edit/sam/sam-s400', 'Edit SAM System');
 - Submit handlers call API endpoints, close overlay on success
 
 ### Data Storage Patterns (`/src/services/fileStorage.ts`)
-**File naming**: `{type}_{id}.json` (e.g., `sam_sam-s400.json`, `fighter_fighter-f16.json`, `scenario-01-clear.json`)
+**File naming**: `{type}_{id}.json` (e.g., `sam_s{DATA_DIR}/platforms/sam_{id}.json
+await storage.saveSAMPlatform(data);    // Writes {DATA_DIR}/platforms/sam_{data.id}.json
+await storage.listAllPlatforms();       // Returns { sams: ISAMSystem[], fighters: IFighterPlatform[] }
+```
 
-**Key functions**:
-```typescript
-await storage.loadSAMPlatform(id);      // Reads /data/platforms/sam_{id}.json
-await storage.saveSAMPlatform(data);    // Writes /data/platforms/sam_{data.id}.json
+**Data directory resolution**:
+- **Environment variable**: Set via `DATA_DIR` (production uses `/app/data`)
+- **Default fallback**: Relative to fileStorage.ts location (`../../data` from dist)
+- **Docker/fly.io**: Always set `DATA_DIR=/app/data` in container environment
+- **Permissions**: `/app/data` owned by `node:node` user in production container
 await storage.listAllPlatforms();       // Returns { sams: ISAMSystem[], fighters: IFighterPlatform[] }
 ```
 
