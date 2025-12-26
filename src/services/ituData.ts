@@ -16,8 +16,12 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { ITU_RAIN_RATES } from '../types/index.js';
 import type { IITUData } from '../types/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let cachedITUData: IITUData | null = null;
 
@@ -36,8 +40,8 @@ export async function loadITUData(): Promise<IITUData> {
   let csvFile: string | undefined;
   let ituDir: string;
   try{
-    ituDir = "/app/data/itu";
-    const files = await fs.readdir(ituDir);
+     ituDir = path.join(__dirname, '..', 'data', 'itu'); // Local development directory
+     const files = await fs.readdir(ituDir);
      csvFile = files.find(f => f.endsWith('.csv'));
   } catch (error) {
     throw new Error(`Failed to read ITU data directory: ${ituDir} with error: ${error}`);

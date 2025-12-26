@@ -15,7 +15,10 @@
  */
 import { promises as fs } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { ITU_RAIN_RATES } from '../types/index.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 let cachedITUData = null;
 const FREQUENCY_START = 5.0; // GHz
 const FREQUENCY_STEP = 0.2; // GHz
@@ -27,9 +30,16 @@ export async function loadITUData() {
     if (cachedITUData) {
         return cachedITUData;
     }
-    const ituDir = path.join(process.cwd(), 'src', 'data', 'itu');
-    const files = await fs.readdir(ituDir);
-    const csvFile = files.find(f => f.endsWith('.csv'));
+    let csvFile;
+    let ituDir;
+    try {
+        ituDir = path.join(__dirname, '..', 'data', 'itu'); // Local development directory
+        const files = await fs.readdir(ituDir);
+        csvFile = files.find(f => f.endsWith('.csv'));
+    }
+    catch (error) {
+        throw new Error(`Failed to read ITU data directory: ${ituDir} with error: ${error}`);
+    }
     if (!csvFile) {
         console.warn('No ITU CSV file found, using empty dataset');
         cachedITUData = {

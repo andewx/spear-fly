@@ -3,6 +3,7 @@
  * Handles reading/writing platform, scenario, and session data
  */
 import type { ISAMSystem, IFighterPlatform, IScenario, ISession } from '../types/index.js';
+export declare function listDirectories(dirPath: string): Promise<string[]>;
 /**
  * Initialize all data directories
  */

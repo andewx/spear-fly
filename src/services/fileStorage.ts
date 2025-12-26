@@ -11,11 +11,13 @@ import type { ISAMSystem, IFighterPlatform, IScenario, ISession } from '../types
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Default to /app/data in production, src/data in development
-const DATA_DIR = "/app/data"
+// Default to /app/data in production, relative path in development
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', '..', 'data');
 const PLATFORMS_DIR = path.join(DATA_DIR, 'platforms');
 const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');
+
+console.log(`[fileStorage] Using DATA_DIR: ${DATA_DIR}`);
 
 
 export async function listDirectories(dirPath: string): Promise<string[]> {
@@ -37,13 +39,16 @@ export async function listDirectories(dirPath: string): Promise<string[]> {
 async function ensureDir(dirPath: string): Promise<void> {
   try {
     await fs.access(dirPath);
-  } catch {
-    try{
-      console.log(`Unable to read path ${dirPath}`);
+    console.log(`[fileStorage] Directory exists: ${dirPath}`);
+  } catch (accessError) {
+    console.log(`[fileStorage] Directory not found, creating: ${dirPath}`);
+    try {
       await fs.mkdir(dirPath, { recursive: true });
-    }catch(e)
-    {
-      console.log(`Unable to write path:${dirPath}\n`);
+      console.log(`[fileStorage] Successfully created: ${dirPath}`);
+    } catch (mkdirError) {
+      console.error(`[fileStorage] Failed to create directory: ${dirPath}`);
+      console.error(`[fileStorage] Error details:`, mkdirError);
+      throw mkdirError; // Re-throw so caller knows it failed
     }
   }
 }

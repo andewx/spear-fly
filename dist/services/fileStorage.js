@@ -4,26 +4,52 @@
  */
 import { promises as fs } from 'fs';
 import path from 'path';
-const DATA_DIR = path.join(process.cwd(), 'src', 'data');
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Default to /app/data in production, relative path in development
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', '..', 'data');
 const PLATFORMS_DIR = path.join(DATA_DIR, 'platforms');
 const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');
+console.log(`[fileStorage] Using DATA_DIR: ${DATA_DIR}`);
+export async function listDirectories(dirPath) {
+    const dirents = await fs.readdir(dirPath);
+    const directories = [];
+    for (const name of dirents) {
+        const stat = await fs.stat(path.join(dirPath, name));
+        if (stat.isDirectory()) {
+            directories.push(name);
+        }
+    }
+    return directories;
+}
 /**
  * Ensure directory exists, create if not
  */
 async function ensureDir(dirPath) {
     try {
         await fs.access(dirPath);
+        console.log(`[fileStorage] Directory exists: ${dirPath}`);
     }
-    catch {
-        await fs.mkdir(dirPath, { recursive: true });
+    catch (accessError) {
+        console.log(`[fileStorage] Directory not found, creating: ${dirPath}`);
+        try {
+            await fs.mkdir(dirPath, { recursive: true });
+            console.log(`[fileStorage] Successfully created: ${dirPath}`);
+        }
+        catch (mkdirError) {
+            console.error(`[fileStorage] Failed to create directory: ${dirPath}`);
+            console.error(`[fileStorage] Error details:`, mkdirError);
+            throw mkdirError; // Re-throw so caller knows it failed
+        }
     }
 }
 /**
  * Initialize all data directories
  */
 export async function initializeDataDirectories() {
-    await Promise.all([
+    await Promise.all([ensureDir(DATA_DIR),
         ensureDir(PLATFORMS_DIR),
         ensureDir(SCENARIOS_DIR),
         ensureDir(SESSIONS_DIR),

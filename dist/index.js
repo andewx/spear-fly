@@ -189,7 +189,6 @@ const main = async () => {
     process.stdout.write('SPEAR - Synthetic Precipitative Environmental Attenuation Radar\n');
     process.stdout.write('================================================================\n');
     try {
-        // Initialize data directories
         process.stdout.write('Initializing data directories...\n');
         await storage.initializeDataDirectories();
         // Load ITU attenuation data
@@ -246,11 +245,9 @@ const main = async () => {
     }
     catch (error) {
         process.stderr.write(`Failed to initialize application: ${error}\n`);
-        process.exit(1);
     }
 };
 main().catch((error) => {
     process.stderr.write(`An error occurred: ${error}\n`);
-    process.exit(1);
 });
 //# sourceMappingURL=index.js.map
