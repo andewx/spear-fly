@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Default to /app/data in production, src/data in development
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
+const DATA_DIR = "/app/data"
 const PLATFORMS_DIR = path.join(DATA_DIR, 'platforms');
 const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');
