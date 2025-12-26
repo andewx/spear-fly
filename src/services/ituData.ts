@@ -33,7 +33,7 @@ export async function loadITUData(): Promise<IITUData> {
     return cachedITUData;
   }
 
-  const ituDir = path.join(process.cwd(), '..', '..', 'data', 'itu');
+  const ituDir = path.join(process.cwd(), '..','data', 'itu');
   const files = await fs.readdir(ituDir);
   const csvFile = files.find(f => f.endsWith('.csv'));
 
