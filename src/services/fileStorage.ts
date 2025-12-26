@@ -7,7 +7,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import type { ISAMSystem, IFighterPlatform, IScenario, ISession } from '../types/index.js';
 
-const DATA_DIR = path.join(process.cwd(), 'src', 'data');
+const DATA_DIR = process.env.DATA_DIR || '/data';
 const PLATFORMS_DIR = path.join(DATA_DIR, 'platforms');
 const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');
