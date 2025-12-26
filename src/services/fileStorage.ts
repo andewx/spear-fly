@@ -14,8 +14,8 @@ const SESSIONS_DIR = path.join(DATA_DIR, 'session');
 
 
 function listDirectoriesSync(dirPath) {
-  const all dirents = fs.readdirSync(dirPath);
-  const directories = all dirents.filter(name => {
+  const dirents = fs.readdirSync(dirPath);
+  const directories = dirents.filter(name => {
     return fs.statSync(path.join(dirPath, name)).isDirectory();
   });
   return directories;
