@@ -33,9 +33,15 @@ export async function loadITUData(): Promise<IITUData> {
     return cachedITUData;
   }
 
-  const ituDir = path.join(process.cwd(), '..','data', 'itu');
-  const files = await fs.readdir(ituDir);
-  const csvFile = files.find(f => f.endsWith('.csv'));
+  let csvFile: string | undefined;
+  let ituDir: string;
+  try{
+    ituDir = path.join(process.cwd(), '..','data', 'itu');
+    const files = await fs.readdir(ituDir);
+     csvFile = files.find(f => f.endsWith('.csv'));
+  } catch (error) {
+    throw new Error(`Failed to read ITU data directory: ${error}`);
+  }
 
   if (!csvFile) {
     console.warn('No ITU CSV file found, using empty dataset');
