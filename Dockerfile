@@ -28,14 +28,14 @@ FROM node:22-slim
 WORKDIR /
 
 # Copy only production dependencies
-COPY --from=build /usr/src/app/package*.json ./
+COPY --from=build package*.json ./
 RUN npm install --only=production
 
 # Copy the built application files from the 'build' stage
-COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /dist ./dist
 
 # Expose the port your app runs on
-ENV PORT=8080
+ENV PORT=3000
 EXPOSE $PORT
 
 # Run the application using the non-root user (recommended for security)
