@@ -297,12 +297,11 @@ const main = async (): Promise<void> => {
 
   } catch (error) {
     process.stderr.write(`Failed to initialize application: ${error}\n`);
-    process.exit(1);
   }
 };
 
 main().catch((error) => {
   process.stderr.write(`An error occurred: ${error}\n`);
-  process.exit(1);
+
 });
 
