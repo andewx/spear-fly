@@ -3,7 +3,7 @@
 FROM node:22 AS build
 
 # Set the working directory inside the container
-WORKDIR /src
+WORKDIR /
 
 # Copy package.json and package-lock.json first to leverage Docker caching.
 # If these files don't change, subsequent builds can skip 'npm install'.
@@ -25,7 +25,7 @@ RUN npm run build || npx tsc
 FROM node:22-slim
 
 # Set the working directory
-WORKDIR /src
+WORKDIR /
 
 # Copy only production dependencies
 COPY --from=build /usr/src/app/package*.json ./
