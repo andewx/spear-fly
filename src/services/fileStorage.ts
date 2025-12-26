@@ -29,7 +29,7 @@ async function ensureDir(dirPath: string): Promise<void> {
  * Initialize all data directories
  */
 export async function initializeDataDirectories(): Promise<void> {
-  await Promise.all([
+  await Promise.all([ensureDir(DATA_DIR),
     ensureDir(PLATFORMS_DIR),
     ensureDir(SCENARIOS_DIR),
     ensureDir(SESSIONS_DIR),
