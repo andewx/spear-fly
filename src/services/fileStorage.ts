@@ -13,11 +13,17 @@ const SCENARIOS_DIR = path.join(DATA_DIR, 'scenarios');
 const SESSIONS_DIR = path.join(DATA_DIR, 'session');
 
 
-function listDirectoriesSync(dirPath) {
-  const dirents = fs.readdirSync(dirPath);
-  const directories = dirents.filter(name => {
-    return fs.statSync(path.join(dirPath, name)).isDirectory();
-  });
+async function listDirectories(dirPath: string): Promise<string[]> {
+  const dirents = await fs.readdir(dirPath);
+  const directories:  string[] = [];
+  
+  for (const name of dirents) {
+    const stat = await fs.stat(path. join(dirPath, name));
+    if (stat.isDirectory()) {
+      directories.push(name);
+    }
+  }
+  
   return directories;
 }
 /**
