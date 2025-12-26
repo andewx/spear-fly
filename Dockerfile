@@ -25,7 +25,7 @@ RUN npm run build || npx tsc
 FROM node:22-slim
 
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /src
 
 # Copy only production dependencies
 COPY --from=build /usr/src/app/package*.json ./
