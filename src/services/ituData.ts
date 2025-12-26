@@ -40,7 +40,7 @@ export async function loadITUData(): Promise<IITUData> {
     const files = await fs.readdir(ituDir);
      csvFile = files.find(f => f.endsWith('.csv'));
   } catch (error) {
-    throw new Error(`Failed to read ITU data directory: ${error}`);
+    throw new Error(`Failed to read ITU data directory: ${ituDir} with error: ${error}`);
   }
 
   if (!csvFile) {
